@@ -19,9 +19,6 @@ void insert_at_head(struct linked_list *list, size_t value) {
     }
     node->next = list->head;
     list->head = node;
-    if (list->tail == NULL) {
-      list->tail = node;
-    }
 }
 
 void insert_at_tail(struct linked_list *list, size_t value) {
@@ -29,14 +26,18 @@ void insert_at_tail(struct linked_list *list, size_t value) {
     if (node == NULL) {
       return;
     }
-    if (list->tail == NULL) {
+    
+    if (list->head == NULL) {
       list->head = node;
-      list->tail = node;
-    } else {
-      list->tail->next = node;
-      list->tail = node;
+      } else {
+        struct list_node *current = list->head;
+        while (current->next != NULL) {
+          current = current->next;
+        }
+        current->next = node;
     }
 }
+
 
 size_t remove_from_head(struct linked_list *list) { 
   if (list->head == NULL) {
@@ -45,37 +46,32 @@ size_t remove_from_head(struct linked_list *list) {
     struct list_node *node = list->head;
     size_t value = node->value;
     list->head = node->next;
-    if (list->head == NULL) {
-      list->tail = NULL;
-    }
     free(node);
     return value;
 }
 
 size_t remove_from_tail(struct linked_list *list) { 
-  if (list->tail == NULL) {
+  if (list->head == NULL) {
     return 0; // or some error value
   }
     
   // If there's only one node
-  if (list->head == list->tail) {
+  if (list->head->next == NULL) {
     size_t value = list->head->value;
     free(list->head);
     list->head = NULL;
-    list->tail = NULL;
     return value;
   }
     
   // Find the node before tail
   struct list_node *prev = list->head;
-  while (prev->next != list->tail) {
+  while (prev->next->next != NULL) {
     prev = prev->next;
   }
     
-  size_t value = list->tail->value;
-  free(list->tail);
-  list->tail = prev;
-  list->tail->next = NULL;
+  size_t value = prev->next->value;
+  free(prev->next);
+  prev->next = NULL;
   return value;
 }
 
